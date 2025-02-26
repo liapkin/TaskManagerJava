@@ -43,11 +43,11 @@ public class ReminderManagementPane extends VBox {
         reminderTable = createReminderTable();
         VBox.setVgrow(reminderTable, Priority.ALWAYS);
 
+        // Bind the TableView directly to the ObservableList from ReminderService.
+        reminderTable.setItems(reminderService.getObservableReminders());
+
         // Add components to the pane
         getChildren().addAll(toolbar, reminderTable);
-
-        // Load initial data
-        refreshReminderList();
     }
 
     private TableView<Reminder> createReminderTable() {
@@ -56,9 +56,7 @@ public class ReminderManagementPane extends VBox {
         TableColumn<Reminder, String> taskCol = new TableColumn<>("Task");
         taskCol.setCellValueFactory(cellData -> {
             Task task = taskService.getTaskById(cellData.getValue().getTaskId());
-            return task != null ? javafx.beans.binding.Bindings.createStringBinding(
-                    () -> task.getTitle()
-            ) : null;
+            return task != null ? javafx.beans.binding.Bindings.createStringBinding(() -> task.getTitle()) : null;
         });
 
         TableColumn<Reminder, ReminderType> typeCol = new TableColumn<>("Reminder Type");
@@ -127,9 +125,7 @@ public class ReminderManagementPane extends VBox {
         datePicker.setDisable(true);
 
         // Enable date picker only for custom date type
-        typeCombo.setOnAction(e -> {
-            datePicker.setDisable(typeCombo.getValue() != ReminderType.CUSTOM_DATE);
-        });
+        typeCombo.setOnAction(e -> datePicker.setDisable(typeCombo.getValue() != ReminderType.CUSTOM_DATE));
 
         content.getChildren().addAll(
                 new Label("Task:"), taskCombo,
@@ -150,12 +146,10 @@ public class ReminderManagementPane extends VBox {
                     showAlert("Invalid Input", "Please select both task and reminder type.");
                     return null;
                 }
-
                 if (selectedType == ReminderType.CUSTOM_DATE && customDate == null) {
                     showAlert("Invalid Input", "Please select a custom date.");
                     return null;
                 }
-
                 try {
                     return reminderService.createReminder(selectedTask, selectedType, customDate);
                 } catch (IllegalArgumentException e) {
@@ -166,7 +160,8 @@ public class ReminderManagementPane extends VBox {
             return null;
         });
 
-        dialog.showAndWait().ifPresent(reminder -> refreshReminderList());
+        dialog.showAndWait();
+        // No manual refresh required—the binding updates the table automatically.
     }
 
     private void showEditReminderDialog() {
@@ -175,13 +170,11 @@ public class ReminderManagementPane extends VBox {
             showAlert("No Reminder Selected", "Please select a reminder to edit.");
             return;
         }
-
         Task associatedTask = taskService.getTaskById(selectedReminder.getTaskId());
         if (associatedTask == null) {
             showAlert("Error", "Associated task not found.");
             return;
         }
-
         Dialog<Reminder> dialog = new Dialog<>();
         dialog.setTitle("Edit Reminder");
         dialog.setHeaderText("Edit Reminder for Task: " + associatedTask.getTitle());
@@ -233,17 +226,14 @@ public class ReminderManagementPane extends VBox {
             if (buttonType == ButtonType.OK) {
                 ReminderType selectedType = typeCombo.getValue();
                 LocalDate customDate = datePicker.getValue();
-
                 if (selectedType == null) {
                     showAlert("Invalid Input", "Please select a reminder type.");
                     return null;
                 }
-
                 if (selectedType == ReminderType.CUSTOM_DATE && customDate == null) {
                     showAlert("Invalid Input", "Please select a custom date.");
                     return null;
                 }
-
                 try {
                     selectedReminder.setType(selectedType);
                     if (selectedType == ReminderType.CUSTOM_DATE) {
@@ -263,7 +253,8 @@ public class ReminderManagementPane extends VBox {
             return null;
         });
 
-        dialog.showAndWait().ifPresent(reminder -> refreshReminderList());
+        dialog.showAndWait();
+        // Binding updates automatically.
     }
 
     private void deleteSelectedReminder() {
@@ -272,22 +263,16 @@ public class ReminderManagementPane extends VBox {
             showAlert("No Reminder Selected", "Please select a reminder to delete.");
             return;
         }
-
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Reminder");
         alert.setHeaderText("Delete Reminder");
         alert.setContentText("Are you sure you want to delete this reminder?");
-
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 reminderService.deleteReminder(selectedReminder.getId());
-                refreshReminderList();
+                // No manual refresh required—the binding updates automatically.
             }
         });
-    }
-
-    private void refreshReminderList() {
-        reminderTable.getItems().setAll(reminderService.getActiveReminders());
     }
 
     private void showAlert(String title, String content) {

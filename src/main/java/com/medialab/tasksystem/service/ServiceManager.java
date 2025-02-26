@@ -31,6 +31,9 @@ public class ServiceManager {
         // Set the services in DataPersistenceService
         this.persistenceService.setServices(taskService, categoryService, priorityService, reminderService);
 
+        taskService.reconcilePriorities(priorityService);
+        taskService.reconcileCategories(categoryService);
+
         // Now force load the data
         ensureDefaultPriorityLevels();
     }
@@ -42,7 +45,7 @@ public class ServiceManager {
         if (existingPriorities.size() <= 1) {
             System.out.println("Creating additional priority levels...");
             if (existingPriorities.isEmpty()) {
-                priorityService.createPriorityLevel("Normal", true); // Create default
+                priorityService.createPriorityLevel("Default", true); // Create default
             }
             priorityService.createPriorityLevel("High", false);
             priorityService.createPriorityLevel("Low", false);

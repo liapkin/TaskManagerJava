@@ -51,11 +51,11 @@ public class PriorityManagementPane extends VBox {
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         nameCol.setPrefWidth(200);
 
-        TableColumn<PriorityLevel, Boolean> defaultCol = new TableColumn<>("Default");
-        defaultCol.setCellValueFactory(new PropertyValueFactory<>("default"));
-        defaultCol.setPrefWidth(100);
+//        TableColumn<PriorityLevel, Boolean> defaultCol = new TableColumn<>("Default");
+//        defaultCol.setCellValueFactory(new PropertyValueFactory<>("default"));
+//        defaultCol.setPrefWidth(100);
 
-        table.getColumns().addAll(nameCol, defaultCol);
+        table.getColumns().addAll(nameCol);
         return table;
     }
 

@@ -16,7 +16,7 @@ public class Task {
     private TaskStatus status;
     private List<Reminder> reminders;
 
-    // Default constructor for Jackson
+
     public Task() {
         this.id = java.util.UUID.randomUUID().toString();
         this.status = TaskStatus.OPEN;

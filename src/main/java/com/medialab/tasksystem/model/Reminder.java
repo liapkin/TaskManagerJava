@@ -8,7 +8,7 @@ public class Reminder {
     private ReminderType type;
     private LocalDate reminderDate;
 
-    // Default constructor for Jackson
+
     public Reminder() {
         this.id = java.util.UUID.randomUUID().toString();
     }
@@ -20,7 +20,7 @@ public class Reminder {
         this.reminderDate = reminderDate;
     }
 
-    // Getters and setters
+
     public String getId() {
         return id;
     }

@@ -14,7 +14,8 @@ import java.util.logging.Logger;
 public class DataPersistenceService {
     private static final Logger LOGGER = Logger.getLogger(DataPersistenceService.class.getName());
     private static final String BASE_DIR = "medialab";
-    private static final String TASKS_FILE = "tasks.json";
+    // Instead of a fixed TASKS_FILE, we use an instance variable:
+    private final String tasksFile;
     private static final String CATEGORIES_FILE = "categories.json";
     private static final String PRIORITIES_FILE = "priorities.json";
     private static final String REMINDERS_FILE = "reminders.json";
@@ -27,11 +28,24 @@ public class DataPersistenceService {
     private PriorityService priorityService;
     private ReminderService reminderService;
 
-    public DataPersistenceService() {
+    /**
+     * Constructs a DataPersistenceService with a specified tasks file.
+     *
+     * @param tasksFile The filename (or relative path) to use for tasks.
+     */
+    public DataPersistenceService(String tasksFile) {
+        this.tasksFile = tasksFile;
         this.objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         this.baseDir = new File(BASE_DIR);
         initializeStorage();
+    }
+
+    /**
+     * Default constructor uses "tasks.json" as the tasks file.
+     */
+    public DataPersistenceService() {
+        this("tasks.json");
     }
 
     public void setServices(TaskService taskService, CategoryService categoryService,
@@ -76,7 +90,6 @@ public class DataPersistenceService {
         if (!file.exists()) {
             return new ArrayList<>();
         }
-
         try {
             CollectionType listType = objectMapper.getTypeFactory()
                     .constructCollectionType(ArrayList.class, type);
@@ -88,11 +101,12 @@ public class DataPersistenceService {
     }
 
     public void saveTasks(List<Task> tasks) {
-        saveToFile(tasks, TASKS_FILE);
+        // Use the configurable tasksFile.
+        saveToFile(tasks, tasksFile);
     }
 
     public List<Task> loadTasks() {
-        return loadFromFile(TASKS_FILE, Task.class);
+        return loadFromFile(tasksFile, Task.class);
     }
 
     public void saveCategories(List<Category> categories) {
